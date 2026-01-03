@@ -1,11 +1,14 @@
 import { supabase } from "@/lib/supabaseClient";
 import { ItemGrid } from "@/components/ItemGrid";
+import { Item } from "@/types/item";
 
 export default async function Home() {
-  const { data: items, error } = await supabase
+  const { data, error } = await supabase
     .from("items")
     .select("*")
     .order("created_at", { ascending: false });
+
+  const items = (data ?? []) as Item[];
 
   if (error) {
     return <p>Error loading items</p>;

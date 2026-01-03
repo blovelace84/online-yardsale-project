@@ -1,6 +1,11 @@
 import { ItemCard } from "@/components/ItemCard";
+import { Item } from "@/types/item";
 
-export function ItemGrid({ items }: { items: any[] }) {
+type Props = {
+  items: Item[];
+};
+
+export function ItemGrid({ items }: Props) {
   if (!items?.length) {
     return <p className="text-gray-500"> No items for sale yet.</p>;
   }
