@@ -15,17 +15,10 @@ export default async function Home() {
   }
 
   return (
-    <main className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Tee Dee St. Yard Sale</h1>
-      <ItemGrid items={items ?? []} />
-      <div className="grid grid-cols-1 md:grid-cols-3 mb-6">
-        {items?.map((item) => (
-          <div key={item.id} className="border rounded-xl p-4">
-            <h2 className="font-semibold">{item.title}</h2>
-            <p className="text-gray-600">{item.price}</p>
-          </div>
-        ))}
-      </div>
+    <main className="max-w-5xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Tee St Yard Sale</h1>
+
+      <ItemGrid items={items} />
     </main>
   );
 }
