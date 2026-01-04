@@ -8,8 +8,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Header />
-      <body>{children}</body>
+      <body>
+        <Header />
+        <main className="max-w-5xl mx-auto p-6">{children}</main>
+      </body>
     </html>
   );
 }
