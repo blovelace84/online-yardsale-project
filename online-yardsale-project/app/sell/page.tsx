@@ -110,7 +110,7 @@ export default function SellPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-black text-white py-2 disabled:opacity-50"
+          className="w-full rounded bg-black text-white py-2 disabled:opacity-50 cursor-pointer"
         >
           {loading ? "Posting..." : "Post Item"}
         </button>
