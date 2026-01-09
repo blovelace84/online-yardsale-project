@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 
-export default function RegisterForm() {
+export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +18,7 @@ export default function RegisterForm() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -36,8 +36,8 @@ export default function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Create account</h1>
-        <p className="text-sm text-gray-700">Start selling your items</p>
+        <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
+        <p className="text-sm text-gray-700">Sign in to continue</p>
       </div>
 
       {error && (
@@ -67,7 +67,7 @@ export default function RegisterForm() {
       </div>
 
       <Button disabled={loading}>
-        {loading ? "Creating account..." : "Create account"}
+        {loading ? "Signing in..." : "Sign in"}
       </Button>
     </form>
   );
