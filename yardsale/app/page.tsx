@@ -1,8 +1,12 @@
-export default function Home() {
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export default async function Home() {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
   return (
     <main className="p-8">
       <h1 className="text-3xl font-bold">Tee Dee St Yard Sale</h1>
-      <p className="mt-2 text-gray-600">Local items for sale</p>
+      <pre className="mt-4">{JSON.stringify(data, null, 2)}</pre>
     </main>
   );
 }
