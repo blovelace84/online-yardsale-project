@@ -3,17 +3,17 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <>
-      <LoginForm />
-      <p className="text-sm text-center mt-4 text-gray-700">
-        Don't have an account?{" "}
-        <Link
-          href="/register"
-          className="font-medium text-gray-900 underline hover:text-black"
-        >
-          Register
-        </Link>
-      </p>
-    </>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-md space-y-6">
+        <LoginForm />
+
+        <div className="text-center text-sm text-gray-600">
+          <p>Or</p>
+          <Link href="/magic-link" className="text-blue-600 hover:underline">
+            Sign in with a magic link
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
