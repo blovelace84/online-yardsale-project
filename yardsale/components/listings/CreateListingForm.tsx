@@ -1,92 +1,111 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { listingSchema } from "@/lib/validators/listing";
+import { createListing } from "@/lib/actions/createListing";
+import type { z } from "zod";
+
+type ListingInput = z.infer<typeof listingSchema>;
 
 export default function CreateListingForm() {
-  const supabase = createClient();
+  const [serverErrors, setServerErrors] = useState<any>(null);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
-  const [error, setError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(listingSchema),
+    mode: "onChange",
+  });
 
-  // ✅ Get logged-in user
-  useEffect(() => {
-    async function getUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const onSubmit = async (data: ListingInput) => {
+    setLoading(true);
+    setServerErrors(null);
 
-      if (user) {
-        setUserId(user.id);
-      }
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("price", data.price.toString());
+    if (data.description) {
+      formData.append("description", data.description);
     }
+    
+    const result = await createListing(formData);
 
-    getUser();
-  }, [supabase]);
+    setLoading(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    if (!userId) {
-      setError("You must be logged in to create a listing");
+    if (result?.error) {
+      setServerErrors(result.error);
       return;
     }
 
-    const { error } = await supabase.from("listings").insert({
-      title,
-      description,
-      price: Number(price),
-      user_id: userId,
-    });
+    alert("Listing created!");
+  };
 
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
-    // Optional: reset form
-    setTitle("");
-    setDescription("");
-    setPrice("");
+  function handleImagePreview(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []);
+    setPreviewImages(files.map((file) => URL.createObjectURL(file)));
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* TITLE */}
+      <div>
+        <label>Title</label>
+        <input {...register("title")} className="input" />
+        {errors.title && <p className="error">{errors.title.message}</p>}
+      </div>
 
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title"
-        className="w-full border px-3 py-2 rounded"
-        required
-      />
+      {/* PRICE */}
+      <div>
+        <label>Price</label>
+        <input
+          type="number"
+          step="0.01"
+          {...register("price", { valueAsNumber: true })}
+          className="input"
+        />
+        {errors.price && <p className="error">{errors.price.message}</p>}
+      </div>
 
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Description"
-        className="w-full border px-3 py-2 rounded"
-        required
-      />
+      {/* DESCRIPTION */}
+      <div>
+        <label>Description</label>
+        <textarea {...register("description")} className="input" />
+      </div>
 
-      <input
-        type="number"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-        placeholder="Price"
-        className="w-full border px-3 py-2 rounded"
-        required
-      />
+      {/* IMAGES */}
+      <div>
+        <label>Images</label>
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          name="images"
+          onChange={handleImagePreview}
+        />
+
+        <div className="flex gap-2 mt-2">
+          {previewImages.map((src, i) => (
+            <img key={i} src={src} className="w-20 h-20 object-cover rounded" />
+          ))}
+        </div>
+      </div>
+
+      {/* SERVER ERRORS */}
+      {serverErrors && (
+        <p className="text-red-600 text-sm">Something went wrong</p>
+      )}
 
       <button
-        type="submit"
-        className="bg-black text-white px-4 py-2 rounded cursor-pointer"
+        disabled={loading}
+        className="bg-black text-white px-6 py-2 rounded"
       >
-        Create Listing
+        {loading ? "Creating..." : "Create Listing"}
       </button>
     </form>
   );

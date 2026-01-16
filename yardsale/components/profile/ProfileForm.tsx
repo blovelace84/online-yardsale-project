@@ -2,9 +2,24 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { profileSchema } from "@/lib/validators/profile";
 
 export default function ProfileForm({ profile }: { profile: any }) {
   const supabase = createClient();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      full_name: profile.full_name,
+      username: profile.username,
+    },
+  });
 
   const [fullName, setFullName] = useState(profile.full_name ?? "");
   const [username, setUsername] = useState(profile.username ?? "");
