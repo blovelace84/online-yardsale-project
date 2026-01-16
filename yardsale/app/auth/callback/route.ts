@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -17,8 +17,8 @@ export async function GET(request: Request) {
           async getAll() {
             return (await cookieStore).getAll();
           },
-          setAll(cookies) {
-            cookies.forEach(async ({ name, value, options }) => {
+          async setAll(cookiesToSet) {
+            cookiesToSet.forEach(async ({ name, value, options }) => {
               (await cookieStore).set(name, value, options);
             });
           },
