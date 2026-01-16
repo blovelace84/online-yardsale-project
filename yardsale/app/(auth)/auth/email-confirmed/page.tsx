@@ -12,7 +12,7 @@ export default function EmailConfirmationPage() {
         </p>
 
         <Link
-          href="/dashboard"
+          href="/email-confirmed"
           className="mt-6 inline-block rounded-lg bg-black px-4 py-2 text-white hover:bg-gray-900"
         >
           Continue to Dashboard
