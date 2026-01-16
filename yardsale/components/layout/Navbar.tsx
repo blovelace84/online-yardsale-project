@@ -34,6 +34,7 @@ export default async function Navbar() {
             <>
               <Link href="/dashboard">Dashboard</Link>
               <Link href="/sell">Sell</Link>
+              <Link href="/profile">Profile</Link>
               <LogoutButton />
             </>
           ) : (
