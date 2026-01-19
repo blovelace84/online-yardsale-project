@@ -1,116 +1,141 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { listingSchema } from "@/lib/validators/listing";
-import { createListing } from "@/lib/actions/createListing";
-import type { z } from "zod";
-
-type ListingInput = z.infer<typeof listingSchema>;
+import { createClient } from "@/lib/supabase/client";
 
 export default function CreateListingForm() {
-  const [serverErrors, setServerErrors] = useState<any>(null);
-  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const supabase = createClient();
+
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ListingInput>({
-    resolver: zodResolver(listingSchema),
-  });
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
 
-  async function onSubmit(data: ListingInput) {
-    setLoading(true);
-    setServerErrors(null);
-
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('price', data.price.toString());
-    if (data.description) {
-      formData.append('description', data.description);
-    }
-
-    const result = await createListing(formData);
-
-    setLoading(false);
-
-    if (result?.error) {
-      setServerErrors(result.error);
+    if (!title || !price) {
+      setError("Title and price are required");
       return;
     }
 
+    setLoading(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setError("You must be logged in");
+      setLoading(false);
+      return;
+    }
+
+    // Upload images
+    const imageUrls: string[] = [];
+
+    for (const file of images) {
+      const filePath = `${user.id}/${Date.now()}-${file.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("listing-images")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        setError("Failed to upload image");
+        setLoading(false);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("listing-images")
+        .getPublicUrl(filePath);
+
+      imageUrls.push(data.publicUrl);
+    }
+
+    // Insert listing
+    const { error: insertError } = await supabase.from("listings").insert({
+      title,
+      price: Number(price),
+      description,
+      images: imageUrls,
+      user_id: user.id,
+    });
+
+    if (insertError) {
+      setError("Failed to create listing");
+      setLoading(false);
+      return;
+    }
+
+    // Reset
+    setTitle("");
+    setPrice("");
+    setDescription("");
+    setImages([]);
+    setLoading(false);
     alert("Listing created!");
   }
 
-  function handleImagePreview(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || []);
-    setPreviewImages(files.map((file) => URL.createObjectURL(file)));
-  }
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* TITLE */}
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto bg-white p-6 rounded-lg border space-y-4"
+    >
+      <h1 className="text-2xl font-bold text-center">Sell an item</h1>
+
+      {error && <p className="text-red-600 text-sm">{error}</p>}
+
       <div>
-        <label>Title</label>
-        <input {...register("title")} className="input" />
-        {errors.title && <p className="error">{errors.title.message}</p>}
+        <label className="block text-sm font-medium">Title</label>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full border rounded px-3 py-2"
+          placeholder="Vintage chair"
+        />
       </div>
 
-      {/* PRICE */}
       <div>
-        <label>Price</label>
+        <label className="block text-sm font-medium">Price</label>
         <input
           type="number"
-          step="0.01"
-          {...register("price", { valueAsNumber: true })}
-          className="input"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          className="w-full border rounded px-3 py-2"
+          placeholder="25"
         />
-        {errors.price && <p className="error">{errors.price.message}</p>}
       </div>
 
-      {/* DESCRIPTION */}
       <div>
-        <label>Description</label>
-        <textarea {...register("description")} className="input" />
+        <label className="block text-sm font-medium">Description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full border rounded px-3 py-2"
+          rows={3}
+        />
       </div>
 
-      {/* IMAGES */}
       <div>
-        <label>Images</label>
+        <label className="block text-sm font-medium">Images</label>
         <input
           type="file"
           multiple
           accept="image/*"
-          name="images"
-          onChange={handleImagePreview}
+          onChange={(e) => setImages(Array.from(e.target.files || []))}
         />
-
-        <div className="flex gap-2 mt-2">
-          {previewImages.map((src, i) => (
-            <img
-              key={i}
-              src={src}
-              className="w-20 h-20 object-cover rounded"
-            />
-          ))}
-        </div>
       </div>
-
-      {/* SERVER ERRORS */}
-      {serverErrors && (
-        <p className="text-red-600 text-sm">
-          Something went wrong
-        </p>
-      )}
 
       <button
         disabled={loading}
-        className="bg-black text-white px-6 py-2 rounded"
+        className="w-full bg-black text-white py-2 rounded hover:bg-gray-900 disabled:opacity-50"
       >
-        {loading ? "Creating..." : "Create Listing"}
+        {loading ? "Posting..." : "Post Listing"}
       </button>
     </form>
   );
