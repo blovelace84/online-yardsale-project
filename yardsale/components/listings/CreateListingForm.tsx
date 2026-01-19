@@ -18,22 +18,21 @@ export default function CreateListingForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<ListingInput>({
     resolver: zodResolver(listingSchema),
-    mode: "onChange",
   });
 
-  const onSubmit = async (data: ListingInput) => {
+  async function onSubmit(data: ListingInput) {
     setLoading(true);
     setServerErrors(null);
 
     const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("price", data.price.toString());
+    formData.append('title', data.title);
+    formData.append('price', data.price.toString());
     if (data.description) {
-      formData.append("description", data.description);
+      formData.append('description', data.description);
     }
-    
+
     const result = await createListing(formData);
 
     setLoading(false);
@@ -44,7 +43,7 @@ export default function CreateListingForm() {
     }
 
     alert("Listing created!");
-  };
+  }
 
   function handleImagePreview(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -91,14 +90,20 @@ export default function CreateListingForm() {
 
         <div className="flex gap-2 mt-2">
           {previewImages.map((src, i) => (
-            <img key={i} src={src} className="w-20 h-20 object-cover rounded" />
+            <img
+              key={i}
+              src={src}
+              className="w-20 h-20 object-cover rounded"
+            />
           ))}
         </div>
       </div>
 
       {/* SERVER ERRORS */}
       {serverErrors && (
-        <p className="text-red-600 text-sm">Something went wrong</p>
+        <p className="text-red-600 text-sm">
+          Something went wrong
+        </p>
       )}
 
       <button
