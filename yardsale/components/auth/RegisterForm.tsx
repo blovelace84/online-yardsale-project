@@ -12,7 +12,7 @@ import {
   Input,
   PrimaryButton,
 } from "@/components/ui/form";
-import type { z } from "zod";
+import { email, type z } from "zod";
 
 type RegisterInput = z.infer<typeof registerSchema>;
 
@@ -29,7 +29,13 @@ export default function RegisterForm() {
   });
 
   async function onSubmit(data: RegisterInput) {
-    const { error } = await supabase.auth.signUp(data);
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
 
     if (!error) {
       router.push("/check-email");
