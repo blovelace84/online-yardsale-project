@@ -63,6 +63,7 @@ export default function CreateListingForm() {
       title,
       price: Number(price),
       description,
+      category,
       images: imageUrls,
       user_id: user.id,
     });
