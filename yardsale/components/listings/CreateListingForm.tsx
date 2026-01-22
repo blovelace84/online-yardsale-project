@@ -9,6 +9,7 @@ export default function CreateListingForm() {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +68,7 @@ export default function CreateListingForm() {
     });
 
     if (insertError) {
+      console.error("Supabase insert error:", insertError);
       setError("Failed to create listing");
       setLoading(false);
       return;
@@ -76,6 +78,7 @@ export default function CreateListingForm() {
     setTitle("");
     setPrice("");
     setDescription("");
+    setCategory("");
     setImages([]);
     setLoading(false);
     alert("Listing created!");
@@ -118,6 +121,16 @@ export default function CreateListingForm() {
           onChange={(e) => setDescription(e.target.value)}
           className="w-full border rounded px-3 py-2"
           rows={3}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium">Category</label>
+        <input
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full border rounded px-3 py-2"
+          placeholder="Furniture"
         />
       </div>
 
