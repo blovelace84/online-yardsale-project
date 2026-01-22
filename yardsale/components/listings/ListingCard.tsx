@@ -8,6 +8,7 @@ type Listing = {
 };
 
 export default function ListingCard({ listing }: { listing: Listing }) {
+  console.log("LISTING DATA:", listing);
   const image = listing.images?.[0];
 
   return (
