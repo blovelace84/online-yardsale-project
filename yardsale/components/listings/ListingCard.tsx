@@ -1,30 +1,36 @@
-import Link from "next/link";
+import Image from "next/image";
 
 type Listing = {
   id: string;
   title: string;
   price: number;
-  status: string;
+  images: string[] | null;
 };
 
 export default function ListingCard({ listing }: { listing: Listing }) {
-  return (
-    <Link
-      href={`/listings/${listing.id}`}
-      className="block rounded-xl border bg-white p-4 shadow-sm hover:shadow-md transition"
-    >
-      <h3 className="text-lg font-semibold text-gray-900">{listing.title}</h3>
-      <p className="mt-1 text-sm text-gray-700">${listing.price}</p>
+  const image = listing.images?.[0];
 
-      <span
-        className={`mt-3 inline-block rounded-full px-3 py-1 text-xs font-medium
-                    listing.status === "available"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-      >
-        {listing.status}
-      </span>
-    </Link>
+  return (
+    <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
+      {image ? (
+        <div className="relative h-48 w-full">
+          <Image
+            src={image}
+            alt={listing.title}
+            fill
+            className="object-cover"
+          />
+        </div>
+      ) : (
+        <div className="h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+          No image
+        </div>
+      )}
+
+      <div className="p-4">
+        <h3 className="font-semibold">{listing.title}</h3>
+        <p className="text-sm text-gray-600">${listing.price}</p>
+      </div>
+    </div>
   );
 }
