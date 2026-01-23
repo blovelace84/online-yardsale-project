@@ -6,7 +6,7 @@ export default async function HomePage() {
 
   const { data: listings } = await (await supabase)
     .from("listings")
-    .select("id, title, price, status")
+    .select("id, title, price, status, images")
     .eq("status", "available")
     .order("created_at", { ascending: false })
     .limit(12);

@@ -8,28 +8,31 @@ type Listing = {
 };
 
 export default function ListingCard({ listing }: { listing: Listing }) {
-  console.log("LISTING DATA:", listing);
-  const image = listing.images?.[0];
+  const imageUrl =
+    listing.images && listing.images.length > 0 ? listing.images[0] : null;
 
   return (
-    <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
-      {image ? (
-        <div className="relative h-48 w-full">
+    <div className="overflow-hidden rounded-lg border bg-white shadow-sm transition hover:shadow-md">
+      {/* Image */}
+      <div className="relative h-48 w-full bg-gray-100">
+        {imageUrl ? (
           <Image
-            src={image}
+            src={imageUrl}
             alt={listing.title}
             fill
             className="object-cover"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
-        </div>
-      ) : (
-        <div className="h-48 bg-gray-200 flex items-center justify-center text-gray-500">
-          No image
-        </div>
-      )}
+        ) : (
+          <div className="flex h-full items-center justify-center text-sm text-gray-500">
+            No image
+          </div>
+        )}
+      </div>
 
-      <div className="p-4">
-        <h3 className="font-semibold">{listing.title}</h3>
+      {/* Content */}
+      <div className="p-4 space-y-1">
+        <h3 className="truncate font-semibold">{listing.title}</h3>
         <p className="text-sm text-gray-600">${listing.price}</p>
       </div>
     </div>
